@@ -1,46 +1,71 @@
 <?php
-if (session_status() === PHP_SESSION_NONE)
+if (session_status() === PHP_SESSION_NONE) {
     session_start();
+}
+
 $activePage = $activePage ?? 'dashboard';
-$role = strtolower($_SESSION['user_role'] ?? 'admin');
-function nav_link($key, $href, $icon, $label, $activePage)
+$role = strtolower($_SESSION['user_role'] ?? $_SESSION['role'] ?? 'admin');
+
+$currentDir = basename(dirname($_SERVER['PHP_SELF']));
+$basePath = ($currentDir === 'admin' || $currentDir === 'user') ? '../' : '';
+
+function nav_link($key, $href, $icon, $label, $activePage, $basePath = '')
 {
     $active = $key === $activePage ? 'active' : '';
-    echo "<a href=\"{$href}\" class=\"sidebar-link {$active}\"><i class=\"bi {$icon}\"></i><span>{$label}</span></a>";
+    echo '<a href="' . $basePath . $href . '" class="sidebar-link ' . $active . '">';
+    echo '<i class="bi ' . $icon . '"></i>';
+    echo '<span>' . $label . '</span>';
+    echo '</a>';
 }
 ?>
+
 <aside class="sidebar-panel">
     <div class="brand-box">
-        <div class="brand-icon">🔥</div>
+        <div class="brand-icon"><i class="bi bi-fire"></i></div>
         <div>
             <div class="brand-title">GYMBRUT</div>
-            <div class="brand-subtitle">Fitness SaaS Premium</div>
+            <div class="brand-subtitle">Fitness Management</div>
         </div>
     </div>
 
+    <div class="sidebar-label">Main Menu</div>
     <nav class="sidebar-nav">
         <?php nav_link('dashboard', 'dashboard.php', 'bi-grid-1x2-fill', 'Dashboard', $activePage); ?>
-        <?php nav_link('members', 'members.php', 'bi-people-fill', 'Members', $activePage); ?>
-        <?php nav_link('memberships', 'memberships.php', 'bi-credit-card-2-front-fill', 'Membership', $activePage); ?>
-        <?php nav_link('payments', 'payments.php', 'bi-cash-coin', 'Payments', $activePage); ?>
-        <?php nav_link('checkin', 'checkin.php', 'bi-geo-alt-fill', 'Check-in', $activePage); ?>
-        <?php nav_link('workouts', 'workouts.php', 'bi-bicycle', 'Workout', $activePage); ?>
-        <?php nav_link('progress', 'progress.php', 'bi-graph-up-arrow', 'Progress', $activePage); ?>
-        <?php nav_link('reports', 'reports.php', 'bi-file-earmark-bar-graph-fill', 'Reports', $activePage); ?>
-        <?php nav_link('profile', 'profile.php', 'bi-gear-fill', 'Settings', $activePage); ?>
-        <?php nav_link('logout', 'login.php', 'bi-box-arrow-right', 'Logout', $activePage); ?>
+
+        <?php if ($role === 'admin'): ?>
+            <?php nav_link('members', 'members.php', 'bi-people-fill', 'Members', $activePage); ?>
+            <?php nav_link('memberships', 'memberships.php', 'bi-credit-card-2-front-fill', 'Membership', $activePage); ?>
+            <?php nav_link('payments', 'payments.php', 'bi-cash-coin', 'Payments', $activePage); ?>
+            <?php nav_link('workouts', 'workouts.php', 'bi-bicycle', 'Workout', $activePage); ?>
+            <?php nav_link('reports', 'reports.php', 'bi-file-earmark-bar-graph-fill', 'Reports', $activePage); ?>
+            <?php nav_link('profile', 'profile.php', 'bi-person-circle', 'Profile', $activePage); ?>
+        <?php else: ?>
+            <?php nav_link('memberships', 'memberships.php', 'bi-credit-card-2-front-fill', 'Membership', $activePage); ?>
+            <?php nav_link('payments', 'payments.php', 'bi-wallet2', 'Payments', $activePage); ?>
+            <?php nav_link('checkin', 'checkin.php', 'bi-geo-alt-fill', 'Check-in', $activePage); ?>
+            <?php nav_link('workouts', 'workouts.php', 'bi-activity', 'Workout Plan', $activePage); ?>
+            <?php nav_link('progress', 'progress.php', 'bi-graph-up-arrow', 'Progress', $activePage); ?>
+            <?php nav_link('reports', 'reports.php', 'bi-bar-chart-line-fill', 'Reports', $activePage); ?>
+            <?php nav_link('profile', 'profile.php', 'bi-person-circle', 'Profile', $activePage); ?>
+        <?php endif; ?>
     </nav>
 
-    <div class="sidebar-user glass-soft">
-        <img src="<?= e($_SESSION['avatar'] ?? 'https://ui-avatars.com/api/?name=GYMBRUT&background=ff7a00&color=fff') ?>"
-            alt="avatar">
-        <div>
-            <div class="fw-semibold text-white">
-                <?= e($_SESSION['name'] ?? 'Guest User') ?>
+    <div class="sidebar-user">
+        <div class="d-flex align-items-center gap-3">
+            <div class="sidebar-user-avatar">
+                <?= strtoupper(substr($_SESSION['user_name'] ?? $_SESSION['name'] ?? 'G', 0, 1)); ?>
             </div>
-            <small class="text-white-50 text-uppercase">
-                <?= e($_SESSION['user_role'] ?? 'member') ?>
-            </small>
+            <div>
+                <div class="fw-semibold">
+                    <?= htmlspecialchars($_SESSION['user_name'] ?? $_SESSION['name'] ?? 'Gym User'); ?></div>
+                <small><?= ucfirst($role); ?></small>
+            </div>
+        </div>
+
+        <div class="sidebar-logout d-grid">
+            <a href="<?= $basePath; ?>logout.php" class="btn btn-light border rounded-4 py-2">
+                <i class="bi bi-box-arrow-left me-1"></i> Logout
+            </a>
         </div>
     </div>
 </aside>
