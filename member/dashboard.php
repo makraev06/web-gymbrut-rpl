@@ -2,6 +2,8 @@
 $pageTitle = 'Dashboard | GYMBRUT';
 $activePage = 'dashboard';
 $topbarTitle = 'Dashboard Gym Management';
+
+require_once '../includes/auth_user.php';
 $searchPlaceholder = 'Cari member aktif, invoice, check-in...';
 include 'includes/layout_top.php';
 $role = strtolower($_SESSION['user_role'] ?? 'admin');
