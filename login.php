@@ -59,68 +59,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         rel="stylesheet">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <link rel="stylesheet" href="assets/css/theme.css">
+    <link rel="stylesheet" href="assets\css\theme.css">
 </head>
 
 <body>
-    <div class="auth-shell simple-auth">
-        <div class="auth-card simple-auth-card">
-            <div class="auth-right">
-                <div class="simple-auth-box">
-                    <div class="simple-auth-logo"></div>
+    <div class="auth-page"> 
+        <div class="auth-card">
+            <div class="auth-logo">
+                <i class="fas fa-dumbbell"></i>
+            </div>
 
-                    <h1 class="simple-auth-brand">GYMBRUT</h1>
-                    <p class="simple-auth-subtitle">Sistem Login Fitness &amp; Gym Management</p>
+            <h1 class="auth-title">GYMBRUT</h1>
+            <p class="auth-subtitle">Sistem Login Fitness &amp; Gym Management</p>
 
-                    <?php if (!empty($error)): ?>
-                        <div class="auth-alert auth-alert-danger">
-                            <?= htmlspecialchars($error) ?>
-                        </div>
-                    <?php endif; ?>
-
-                    <?php if (!empty($success)): ?>
-                        <div class="auth-alert auth-alert-success">
-                            <?= htmlspecialchars($success) ?>
-                        </div>
-                    <?php endif; ?>
-
-                    <form method="POST" class="simple-auth-form">
-                        <div class="form-group">
-                            <label class="form-label" for="email">Email</label>
-                            <div class="simple-input-wrap">
-                                <i class="far fa-envelope"></i>
-                                <input type="email" id="email" name="email" class="form-control"
-                                    placeholder="Masukkan email" value="<?= htmlspecialchars($_POST['email'] ?? '') ?>"
-                                    required>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label" for="password">Password</label>
-                            <div class="simple-input-wrap">
-                                <i class="fas fa-lock"></i>
-                                <input type="password" id="password" name="password" class="form-control"
-                                    placeholder="Masukkan password" required>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="gradient-btn">Login</button>
-                    </form>
-
-                    <div class="simple-auth-links">
-                        Belum punya akun? <a href="register.php">Register sekarang</a>
-                    </div>
-
-                    <div class="simple-auth-footer">
-                        <div class="simple-auth-footer-links">
-                            <a href="#">Privacy Policy</a>
-                            <a href="#">Terms of Service</a>
-                            <a href="#">Support</a>
-                        </div>
-
-                        <div class="simple-auth-version">V2.4.1 Secure Access</div>
-                    </div>
+            <?php if (!empty($error)): ?>
+                <div class="auth-alert auth-alert-danger">
+                    <?= htmlspecialchars($error) ?>
                 </div>
+            <?php endif; ?>
+
+            <?php if (!empty($success)): ?>
+                <div class="auth-alert auth-alert-success">
+                    <?= htmlspecialchars($success) ?>
+                </div>
+            <?php endif; ?>
+
+            <form method="POST" class="auth-form">
+                <div class="form-group">
+                    <label class="form-label" for="email">Email</label>
+                    <input type="email" id="email" name="email" class="form-control"
+                           placeholder="Masukkan email" 
+                           value="<?= htmlspecialchars($_POST['email'] ?? '') ?>" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="password">Password</label>
+                    <input type="password" id="password" name="password" class="form-control"
+                           placeholder="Masukkan password" required>
+                </div>
+
+                <button type="submit" class="gradient-btn w-100">Login</button>
+            </form>
+
+            <div class="auth-links">
+                Belum punya akun? <a href="register.php">Register sekarang</a>
             </div>
         </div>
     </div>
