@@ -21,3 +21,6 @@ Catatan:
 2. UI sudah diarahkan ke konsep startup fitness SaaS premium.
 3. Koneksi database memakai config/database.php.
 4. auth_check.php memakai fallback session demo supaya tampilan mudah dicoba.
+
+admin: admin@login.com/admin123
+user: ucup@gmail.com/member123
