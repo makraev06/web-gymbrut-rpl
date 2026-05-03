@@ -1,12 +1,8 @@
 <?php
 session_start();
 
-$pageTitle = 'Tambah Paket';
-$topbarTitle = 'Tambah Paket Membership';
-$topbarSubtitle = 'Tambahkan paket membership baru untuk member.';
-$searchPlaceholder = 'Cari...';
 
-include '../../includes/layout_top.php';
+require_once '../../config/database.php';
 
 $error = '';
 
@@ -31,6 +27,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 }
+
+$pageTitle = 'Tambah Paket';
+$topbarTitle = 'Tambah Paket Membership';
+$topbarSubtitle = 'Tambahkan paket membership baru untuk member.';
+$searchPlaceholder = 'Cari...';
+
+include '../../includes/layout_top.php';
 ?>
 
 <section class="page-section">
@@ -83,4 +86,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 </section>
 
-<?php include '../includes/layout_bottom.php'; ?>
+<?php include '../../includes/layout_bottom.php'; ?>
