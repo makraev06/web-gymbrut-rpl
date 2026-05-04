@@ -1,5 +1,5 @@
 <?php
-/* member/notifications.php */
+
 session_start();
 
 $_SESSION['role'] = $_SESSION['role'] ?? 'member';
@@ -10,11 +10,10 @@ $topbarTitle = 'Notifikasi';
 $topbarSubtitle = 'Pemberitahuan terbaru untuk akun kamu.';
 $searchPlaceholder = 'Cari notifikasi...';
 
-include '../includes/layout_top.php';
+include '../config/database.php';
 
 $userId = (int) ($_SESSION['user_id'] ?? 0);
 
-/* Tandai semua dibaca */
 if (isset($_GET['read_all']) && $userId > 0) {
     $stmt = $conn->prepare("
         UPDATE notifications
@@ -28,7 +27,6 @@ if (isset($_GET['read_all']) && $userId > 0) {
     exit;
 }
 
-/* Tandai satu notif dibaca */
 if (isset($_GET['read']) && $userId > 0) {
     $notificationId = (int) $_GET['read'];
 
@@ -46,6 +44,8 @@ if (isset($_GET['read']) && $userId > 0) {
     header("Location: notifications.php");
     exit;
 }
+
+include '../includes/layout_top.php';
 
 /* Ambil notif */
 $notifications = [];
