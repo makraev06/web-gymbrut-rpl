@@ -63,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="auth-page">
         <div class="auth-card">
             <div class="auth-logo">
-                <i class="fas fa-dumbbell"></i>
+                <img src="assets/img/Logo%20Gymbrut.svg" alt="Gymbrut Logo">
             </div>
 
             <h1 class="auth-title">GYMBRUT</h1>

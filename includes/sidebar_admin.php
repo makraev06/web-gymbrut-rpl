@@ -63,7 +63,7 @@ $menus = [
     <!-- LOGO -->
     <div class="sidebar-brand">
         <div class="sidebar-brand-logo">
-            <i class="bi bi-lightning-charge-fill"></i>
+            <img src="/rpl-web/assets/img/Logo%20Gymbrut.svg" alt="Gymbrut Logo">
         </div>
         <div class="sidebar-brand-text">
             <h2>GYMBRUT</h2>
