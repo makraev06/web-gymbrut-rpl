@@ -10,10 +10,10 @@ $requestUri = $_SERVER['REQUEST_URI'];
 $isAdminPage = strpos($requestUri, '/admin/') !== false;
 $isMemberPage = strpos($requestUri, '/member/') !== false;
 
-if ($isAdminPage) {
-    require_once __DIR__ . '/auth_admin.php';
-} elseif ($isMemberPage) {
-    require_once __DIR__ . '/auth_user.php';
+if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
+    include 'auth_admin.php';
+} else {
+    include 'auth_user.php';
 }
 
 $pageTitle = $pageTitle ?? 'GYMBRUT';

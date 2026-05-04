@@ -85,15 +85,16 @@ $workouts = gymbrut_query_all($conn, "
               </a>
             <?php endif; ?>
 
-            <a href="#" class="btn-outline-soft btn-sm">
+            <a href="detailWorkout.php?id=<?= $workout['workout_id'] ?>" class="btn-outline-soft btn-sm">
               <i class="bi bi-eye"></i> Detail
             </a>
 
-            <a href="#" class="btn-outline-soft btn-sm">
+            <a href="editWorkout.php?id=<?= $workout['workout_id'] ?>" class="btn-outline-soft btn-sm">
               <i class="bi bi-pencil-square"></i> Edit
             </a>
 
-            <a href="#" class="btn-outline-soft btn-sm">
+            <a href="deleteWorkout.php?id=<?= $workout['workout_id'] ?>"
+              onclick="return confirm('Yakin ingin menghapus program ini?')" class="btn-outline-soft btn-sm">
               <i class="bi bi-trash3"></i> Hapus
             </a>
           </div>

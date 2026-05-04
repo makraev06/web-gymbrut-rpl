@@ -313,7 +313,7 @@ function workoutBadgeClass($category)
 
     $imagePath = '';
     if (!empty($workout['image_file'])) {
-      $imagePath = '../uploads/workouts/' . $workout['image_file'];
+      $imagePath = '../assets/img/' . $workout['image_file'];
     }
 
     $youtubeUrl = trim($workout['youtube_url'] ?? '');
@@ -373,16 +373,22 @@ function workoutBadgeClass($category)
           <?= e($workout['tutorial'] ?: 'Belum ada tutorial untuk workout ini.') ?>
         </p>
 
-        <?php if (!empty($youtubeUrl)): ?>
-          <a href="<?= e($youtubeUrl) ?>" target="_blank" class="gradient-btn btn-sm">
-            <i class="bi bi-youtube"></i>
-            Lihat Tutorial
+        <div class="d-flex gap-8 mt-2">
+
+          <a href="../admin/workout/detailWorkout.php?id=<?= $workout['workout_id'] ?>"
+            class="btn-outline-soft btn-sm">
+            <i class="bi bi-eye"></i>
+            Detail
           </a>
-        <?php else: ?>
-          <span class="text-soft">
-            Tidak ada link tutorial video.
-          </span>
-        <?php endif; ?>
+
+          <?php if (!empty($youtubeUrl)): ?>
+            <a href="<?= e($youtubeUrl) ?>" target="_blank" class="gradient-btn btn-sm">
+              <i class="bi bi-youtube"></i>
+              Tutorial
+            </a>
+          <?php endif; ?>
+
+        </div>
       </div>
     </div>
   <?php endforeach; ?>
