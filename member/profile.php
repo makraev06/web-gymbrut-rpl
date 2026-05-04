@@ -11,13 +11,80 @@ $topbarSubtitle = 'Kelola informasi akun, data tubuh, dan target fitness kamu.';
 $searchPlaceholder = 'Cari profile...';
 
 $bodyClass = 'member-profile-page';
-
 include '../includes/layout_top.php';
+?>
 
+<?php if (!empty($success)): ?>
+        <div class="alert alert-success">
+            <i class="bi bi-check-circle"></i>
+            <?= e($success) ?>
+        </div>
+<?php endif; ?>
+
+<?php if (!empty($error)): ?>
+        <div class="alert alert-danger">
+            <i class="bi bi-exclamation-circle"></i>
+            <?= e($error) ?>
+        </div>
+<?php endif; ?>
+
+<?php
+$userId = (int) ($_SESSION['user_id'] ?? 0);
 $userId = (int) ($_SESSION['user_id'] ?? 0);
 
 $success = '';
 $error = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
+    $userId = (int) ($_SESSION['user_id'] ?? 0);
+
+    $currentPassword = trim($_POST['current_password'] ?? '');
+    $newPassword = trim($_POST['new_password'] ?? '');
+    $confirmPassword = trim($_POST['confirm_password'] ?? '');
+
+    if ($userId <= 0) {
+        $error = 'Session user tidak ditemukan. Silakan login ulang.';
+    } elseif ($currentPassword === '' || $newPassword === '' || $confirmPassword === '') {
+        $error = 'Semua field password wajib diisi.';
+    } elseif (strlen($newPassword) < 6) {
+        $error = 'Password baru minimal 6 karakter.';
+    } elseif ($newPassword !== $confirmPassword) {
+        $error = 'Konfirmasi password tidak sama.';
+    } else {
+        require_once '../config/database.php';
+
+        $stmt = $conn->prepare("SELECT password FROM users WHERE user_id = ? LIMIT 1");
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+
+        $result = $stmt->get_result();
+        $user = $result->fetch_assoc();
+
+        if (!$user) {
+            $error = 'Data user tidak ditemukan.';
+        } else {
+            $dbPassword = $user['password'];
+
+            $passwordValid = password_verify($currentPassword, $dbPassword) || $currentPassword === $dbPassword;
+
+            if (!$passwordValid) {
+                $error = 'Password lama salah.';
+            } else {
+                $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+
+                $stmt = $conn->prepare("UPDATE users SET password = ? WHERE user_id = ?");
+                $stmt->bind_param("si", $hashedPassword, $userId);
+
+                if ($stmt->execute()) {
+                    $success = 'Password berhasil diubah.';
+                } else {
+                    $error = 'Gagal mengubah password.';
+                }
+            }
+        }
+    }
+}
+
 
 /* =========================
    AMBIL DATA USER

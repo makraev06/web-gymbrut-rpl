@@ -82,7 +82,7 @@ $payments = gymbrut_query_all($conn, "
               <td><?= date('d M Y', strtotime($payment['payment_date'])) ?></td>
               <td>
                 <?php if (!empty($payment['proof_file'])): ?>
-                  <a href="../uploads/payments/<?= e($payment['proof_file']) ?>" target="_blank"
+                  <a href="../../uploads/payments/<?= e($payment['proof_file']) ?>" target="_blank"
                     class="btn-outline-soft btn-sm">
                     Lihat
                   </a>
