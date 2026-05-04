@@ -23,8 +23,16 @@ $members = gymbrut_query_all($conn, "
     m.end_date,
     m.status
   FROM users u
-  LEFT JOIN memberships m ON u.user_id = m.user_id
-  LEFT JOIN membership_packages mp ON m.package_id = mp.package_id
+  LEFT JOIN memberships m 
+    ON m.membership_id = (
+      SELECT m2.membership_id 
+      FROM memberships m2
+      WHERE m2.user_id = u.user_id 
+      ORDER BY m2.start_date DESC 
+      LIMIT 1
+    )
+  LEFT JOIN membership_packages mp 
+    ON m.package_id = mp.package_id
   WHERE u.role = 'member'
   ORDER BY u.user_id DESC
 ");

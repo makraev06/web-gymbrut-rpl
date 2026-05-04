@@ -6,7 +6,7 @@ $topbarTitle = 'Edit Member';
 $topbarSubtitle = 'Ubah data member dan membership.';
 $searchPlaceholder = 'Cari...';
 
-include '../../includes/layout_top.php';
+include '../../config/database.php';
 
 $id = (int) ($_GET['id'] ?? 0);
 
@@ -110,6 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
+include '../../includes/layout_top.php';
 ?>
 
 <section class="page-section">
