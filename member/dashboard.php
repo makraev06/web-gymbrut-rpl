@@ -225,21 +225,21 @@ $quickStats = [
 
 <div class="row g-4 mb-4">
     <?php foreach ($quickStats as $item): ?>
-        <div class="col-md-6 col-xl-3">
-            <div class="stat-card stat-card-modern">
-                <div>
-                    <p class="stat-label"><?= e($item['label']) ?></p>
-                    <h3 class="stat-value" style="font-size:24px;">
-                        <?= e($item['value']) ?>
-                    </h3>
-                    <span class="stat-meta"><?= e($item['meta']) ?></span>
-                </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="stat-card stat-card-modern">
+            <div>
+                <p class="stat-label"><?= e($item['label']) ?></p>
+                <h3 class="stat-value" style="font-size:24px;">
+                    <?= e($item['value']) ?>
+                </h3>
+                <span class="stat-meta"><?= e($item['meta']) ?></span>
+            </div>
 
-                <div class="stat-icon">
-                    <i class="<?= e($item['icon']) ?>"></i>
-                </div>
+            <div class="stat-icon">
+                <i class="<?= e($item['icon']) ?>"></i>
             </div>
         </div>
+    </div>
     <?php endforeach; ?>
 </div>
 
@@ -297,22 +297,22 @@ $quickStats = [
 
             <div class="card-list">
                 <?php if (empty($workouts)): ?>
-                    <p class="text-soft mb-0">Belum ada data workout.</p>
+                <p class="text-soft mb-0">Belum ada data workout.</p>
                 <?php endif; ?>
 
                 <?php foreach ($workouts as $item): ?>
-                    <div class="list-row">
-                        <div>
-                            <p class="list-row-title">
-                                <?= e($item['title']) ?> — <?= e($item['category']) ?>
-                            </p>
-                            <p class="list-row-subtitle">
-                                <?= e($item['sets_count'] ?? '-') ?> set • <?= e($item['reps_count'] ?? '-') ?> reps
-                            </p>
-                        </div>
-
-                        <span class="badge-soft badge-info">Workout</span>
+                <div class="list-row">
+                    <div>
+                        <p class="list-row-title">
+                            <?= e($item['title']) ?> — <?= e($item['category']) ?>
+                        </p>
+                        <p class="list-row-subtitle">
+                            <?= e($item['sets_count'] ?? '-') ?> set • <?= e($item['reps_count'] ?? '-') ?> reps
+                        </p>
                     </div>
+
+                    <span class="badge-soft badge-info">Workout</span>
+                </div>
                 <?php endforeach; ?>
             </div>
         </div>
@@ -347,15 +347,15 @@ $quickStats = [
 
                     <tbody>
                         <?php if (empty($recentPayments)): ?>
-                            <tr>
-                                <td colspan="5" class="text-soft">
-                                    Belum ada pembayaran.
-                                </td>
-                            </tr>
+                        <tr>
+                            <td colspan="5" class="text-soft">
+                                Belum ada pembayaran.
+                            </td>
+                        </tr>
                         <?php endif; ?>
 
                         <?php foreach ($recentPayments as $payment): ?>
-                            <?php
+                        <?php
                             $badge = 'badge-pending';
 
                             if ($payment['status'] === 'verified') {
@@ -369,29 +369,29 @@ $quickStats = [
                                 : '-';
                             ?>
 
-                            <tr>
-                                <td>
-                                    <strong>INV-<?= e($payment['payment_id']) ?></strong>
-                                </td>
+                        <tr>
+                            <td>
+                                <strong>INV-<?= e($payment['payment_id']) ?></strong>
+                            </td>
 
-                                <td>
-                                    <?= e($payment['package_name']) ?>
-                                </td>
+                            <td>
+                                <?= e($payment['package_name']) ?>
+                            </td>
 
-                                <td>
-                                    Rp <?= number_format((float) $payment['amount'], 0, ',', '.') ?>
-                                </td>
+                            <td>
+                                Rp <?= number_format((float) $payment['amount'], 0, ',', '.') ?>
+                            </td>
 
-                                <td>
-                                    <span class="badge-soft <?= e($badge) ?>">
-                                        <?= e(ucfirst($payment['status'])) ?>
-                                    </span>
-                                </td>
+                            <td>
+                                <span class="badge-soft <?= e($badge) ?>">
+                                    <?= e(ucfirst($payment['status'])) ?>
+                                </span>
+                            </td>
 
-                                <td>
-                                    <?= e($paymentDate) ?>
-                                </td>
-                            </tr>
+                            <td>
+                                <?= e($paymentDate) ?>
+                            </td>
+                        </tr>
                         <?php endforeach; ?>
                     </tbody>
                 </table>

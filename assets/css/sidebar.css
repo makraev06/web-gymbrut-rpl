@@ -8,7 +8,7 @@
   height: 100vh !important;
   background: var(--card);
   border-right: 1px solid var(--border);
-  padding: 22px 16px 18px;
+  padding: 24px 14px 18px;
   overflow-y: auto;
   overflow-x: hidden;
   z-index: 1000;
@@ -20,19 +20,19 @@
 .sidebar-brand {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 10px 10px 18px;
-  margin-bottom: 8px;
+  gap: 12px;
+  padding: 8px 10px 20px;
+  margin-bottom: 6px;
 }
 
 .sidebar-brand-logo {
-  width: 50px;
-  height: 50px;
-  border-radius: 16px;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 10px 24px rgba(255, 122, 0, 0.25);
+  box-shadow: 0 8px 20px rgba(255, 122, 0, 0.18);
   flex-shrink: 0;
   background: transparent;
 }
@@ -48,7 +48,7 @@
   font-size: 20px;
   font-weight: 800;
   line-height: 1.1;
-  letter-spacing: 0.02em;
+  letter-spacing: 0;
 }
 
 .sidebar-brand-text p {
@@ -56,23 +56,23 @@
   font-size: 12px;
   color: var(--text-fade);
   text-transform: uppercase;
-  letter-spacing: 0.14em;
+  letter-spacing: 0;
   font-weight: 700;
 }
 
 .sidebar-title {
-  margin: 18px 10px 10px;
+  margin: 18px 10px 9px;
   font-size: 11px;
   font-weight: 800;
   color: var(--text-fade);
   text-transform: uppercase;
-  letter-spacing: 0.15em;
+  letter-spacing: 0;
 }
 
 .sidebar-nav {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
   flex: 1;
 }
 
@@ -80,8 +80,8 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 13px 14px;
-  border-radius: 14px;
+  padding: 12px 13px;
+  border-radius: var(--radius-md);
   color: #475569;
   font-weight: 600;
   transition: var(--transition);
@@ -98,6 +98,7 @@
 .sidebar-link:hover {
   background: var(--primary-soft);
   color: var(--primary-dark);
+  border-color: var(--primary-border);
 }
 
 .sidebar-link.active {
@@ -109,7 +110,7 @@
 
 .sidebar-footer {
   margin-top: auto;
-  padding: 16px 12px 12px;
+  padding: 16px 10px 10px;
   border-top: 1px solid var(--border);
 }
 
@@ -117,13 +118,13 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
 .sidebar-avatar {
-  width: 46px;
-  height: 46px;
-  border-radius: 14px;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
   background: #f1f5f9;
   color: var(--text);
   display: flex;
@@ -132,17 +133,20 @@
   font-weight: 800;
   font-size: 18px;
   flex-shrink: 0;
+  overflow: hidden;
+  border: 2px solid var(--primary-soft);
 }
 
 .sidebar-user-name {
   margin: 0;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
+  line-height: 1.25;
 }
 
 .sidebar-user-role {
   margin: 3px 0 0;
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text-soft);
 }
 
@@ -170,7 +174,7 @@
 
   .sidebar-link {
     justify-content: center;
-    padding: 13px 10px;
+    padding: 12px 10px;
   }
 
   .sidebar-footer {
