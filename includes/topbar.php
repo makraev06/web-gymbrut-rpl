@@ -8,6 +8,21 @@ $userRole = $_SESSION['role'] ?? 'member';
 
 $initial = strtoupper(substr($userName, 0, 1));
 
+$topbarPhoto = '../assets/img/default-avatar.svg';
+
+if (isset($conn) && !empty($_SESSION['user_id'])) {
+    $topbarUserId = (int) $_SESSION['user_id'];
+
+    $stmtPhoto = $conn->prepare("SELECT photo FROM users WHERE user_id = ? LIMIT 1");
+    $stmtPhoto->bind_param("i", $topbarUserId);
+    $stmtPhoto->execute();
+    $photoResult = $stmtPhoto->get_result()->fetch_assoc();
+
+    if ($photoResult && !empty($photoResult['photo'])) {
+        $topbarPhoto = '../assets/uploads/profile/' . $photoResult['photo'];
+    }
+}
+
 $notifCount = 0;
 $notifications = [];
 
@@ -54,7 +69,7 @@ if ($userRole === 'member' && isset($conn)) {
         <h1><?= e($topbarTitle) ?></h1>
 
         <?php if (!empty($topbarSubtitle)): ?>
-            <p><?= e($topbarSubtitle) ?></p>
+        <p><?= e($topbarSubtitle) ?></p>
         <?php endif; ?>
     </div>
 
@@ -88,24 +103,24 @@ if ($userRole === 'member' && isset($conn)) {
         </div>
 
         <?php if ($userRole === 'member'): ?>
-            <div class="notif-wrapper">
-                <a href="../member/notifications.php" class="icon-btn notif-toggle">
-                    <i class="bi bi-bell"></i>
-
-                    <?php if ($notifCount > 0): ?>
-                        <span class="notif-badge"><?= e($notifCount) ?></span>
-                    <?php endif; ?>
-                </a>
-            </div>
-        <?php else: ?>
-            <button type="button" class="icon-btn">
+        <div class="notif-wrapper">
+            <a href="../member/notifications.php" class="icon-btn notif-toggle">
                 <i class="bi bi-bell"></i>
-            </button>
+
+                <?php if ($notifCount > 0): ?>
+                <span class="notif-badge"><?= e($notifCount) ?></span>
+                <?php endif; ?>
+            </a>
+        </div>
+        <?php else: ?>
+        <button type="button" class="icon-btn">
+            <i class="bi bi-bell"></i>
+        </button>
         <?php endif; ?>
 
         <div class="profile-chip">
-            <span class="profile-chip-avatar">
-                <?= e($initial) ?>
+            <span class="profile-chip-avatar profile-chip-avatar-img">
+                <img src="<?= e($topbarPhoto) ?>" alt="Foto Profile">
             </span>
 
             <div>

@@ -15,7 +15,27 @@ $menus = [
     ['file' => 'workouts.php', 'label' => 'Workouts', 'icon' => 'bi bi-heart-pulse-fill'],
     ['file' => 'profile.php', 'label' => 'Profile', 'icon' => 'bi bi-person-circle'],
 ];
+
+$sidebarPhoto = null;
+
+if (isset($conn) && !empty($_SESSION['user_id'])) {
+    $sidebarUserId = (int) $_SESSION['user_id'];
+
+    $stmt = $conn->prepare("SELECT photo FROM users WHERE user_id = ? LIMIT 1");
+    $stmt->bind_param("i", $sidebarUserId);
+    $stmt->execute();
+    $photoResult = $stmt->get_result()->fetch_assoc();
+
+    if ($photoResult && !empty($photoResult['photo'])) {
+        $sidebarPhoto = '../assets/uploads/profile/' . $photoResult['photo'];
+    }
+}
+
+$sidebarPhoto = $sidebarPhoto ?: '../assets/img/default-avatar.svg';
+
 ?>
+
+
 
 <aside class="sidebar">
     <div class="sidebar-brand">
@@ -32,17 +52,17 @@ $menus = [
 
     <nav class="sidebar-nav">
         <?php foreach ($menus as $menu): ?>
-            <a href="<?= e($menu['file']) ?>" class="sidebar-link <?= $currentPage === $menu['file'] ? 'active' : '' ?>">
-                <i class="<?= e($menu['icon']) ?>"></i>
-                <span><?= e($menu['label']) ?></span>
-            </a>
+        <a href="<?= e($menu['file']) ?>" class="sidebar-link <?= $currentPage === $menu['file'] ? 'active' : '' ?>">
+            <i class="<?= e($menu['icon']) ?>"></i>
+            <span><?= e($menu['label']) ?></span>
+        </a>
         <?php endforeach; ?>
     </nav>
 
     <div class="sidebar-footer">
         <div class="sidebar-user">
-            <div class="sidebar-avatar">
-                <?= strtoupper(substr($userName, 0, 1)) ?>
+            <div class="sidebar-avatar sidebar-avatar-img">
+                <img src="<?= e($sidebarPhoto) ?>" alt="Foto Profile">
             </div>
             <div class="sidebar-user-info">
                 <p class="sidebar-user-name"><?= e($userName) ?></p>

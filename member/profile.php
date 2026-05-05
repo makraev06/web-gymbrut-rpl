@@ -2,89 +2,23 @@
 /* member/profile.php */
 session_start();
 
-$_SESSION['role'] = $_SESSION['role'] ?? 'member';
-$_SESSION['name'] = $_SESSION['name'] ?? 'Member';
+require_once '../config/database.php';
+require_once '../includes/auth_user.php';
 
 $pageTitle = 'Profile Saya';
 $topbarTitle = 'Profile Saya';
 $topbarSubtitle = 'Kelola informasi akun, data tubuh, dan target fitness kamu.';
 $searchPlaceholder = 'Cari profile...';
-
 $bodyClass = 'member-profile-page';
-include '../includes/layout_top.php';
-?>
 
-<?php if (!empty($success)): ?>
-        <div class="alert alert-success">
-            <i class="bi bi-check-circle"></i>
-            <?= e($success) ?>
-        </div>
-<?php endif; ?>
-
-<?php if (!empty($error)): ?>
-        <div class="alert alert-danger">
-            <i class="bi bi-exclamation-circle"></i>
-            <?= e($error) ?>
-        </div>
-<?php endif; ?>
-
-<?php
 $userId = (int) ($_SESSION['user_id'] ?? 0);
-$userId = (int) ($_SESSION['user_id'] ?? 0);
-
 $success = '';
 $error = '';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
-    $userId = (int) ($_SESSION['user_id'] ?? 0);
-
-    $currentPassword = trim($_POST['current_password'] ?? '');
-    $newPassword = trim($_POST['new_password'] ?? '');
-    $confirmPassword = trim($_POST['confirm_password'] ?? '');
-
-    if ($userId <= 0) {
-        $error = 'Session user tidak ditemukan. Silakan login ulang.';
-    } elseif ($currentPassword === '' || $newPassword === '' || $confirmPassword === '') {
-        $error = 'Semua field password wajib diisi.';
-    } elseif (strlen($newPassword) < 6) {
-        $error = 'Password baru minimal 6 karakter.';
-    } elseif ($newPassword !== $confirmPassword) {
-        $error = 'Konfirmasi password tidak sama.';
-    } else {
-        require_once '../config/database.php';
-
-        $stmt = $conn->prepare("SELECT password FROM users WHERE user_id = ? LIMIT 1");
-        $stmt->bind_param("i", $userId);
-        $stmt->execute();
-
-        $result = $stmt->get_result();
-        $user = $result->fetch_assoc();
-
-        if (!$user) {
-            $error = 'Data user tidak ditemukan.';
-        } else {
-            $dbPassword = $user['password'];
-
-            $passwordValid = password_verify($currentPassword, $dbPassword) || $currentPassword === $dbPassword;
-
-            if (!$passwordValid) {
-                $error = 'Password lama salah.';
-            } else {
-                $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
-
-                $stmt = $conn->prepare("UPDATE users SET password = ? WHERE user_id = ?");
-                $stmt->bind_param("si", $hashedPassword, $userId);
-
-                if ($stmt->execute()) {
-                    $success = 'Password berhasil diubah.';
-                } else {
-                    $error = 'Gagal mengubah password.';
-                }
-            }
-        }
-    }
+if ($userId <= 0) {
+    header('Location: ../login.php');
+    exit;
 }
-
 
 /* =========================
    AMBIL DATA USER
@@ -99,6 +33,7 @@ $user = [
     'height' => '',
     'weight' => '',
     'target_fitness' => '',
+    'photo' => null,
     'created_at' => null
 ];
 
@@ -113,6 +48,7 @@ $stmt = $conn->prepare("
         height,
         weight,
         target_fitness,
+        photo,
         created_at
     FROM users
     WHERE user_id = ?
@@ -124,6 +60,53 @@ $result = $stmt->get_result();
 
 if ($result && $result->num_rows > 0) {
     $user = $result->fetch_assoc();
+}
+
+/* =========================
+   UPDATE FOTO PROFILE
+========================= */
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_photo'])) {
+    $photoName = $user['photo'] ?? null;
+
+    if (empty($_POST['cropped_photo'])) {
+        $error = 'Pilih foto terlebih dahulu.';
+    } else {
+        $croppedPhoto = $_POST['cropped_photo'];
+
+        if (!preg_match('/^data:image\/(png|jpeg|jpg|webp);base64,/', $croppedPhoto)) {
+            $error = 'Format foto tidak valid.';
+        } else {
+            $imageData = preg_replace('/^data:image\/(png|jpeg|jpg|webp);base64,/', '', $croppedPhoto);
+            $imageData = base64_decode($imageData);
+
+            if ($imageData === false) {
+                $error = 'Foto gagal diproses.';
+            } else {
+                $uploadDir = __DIR__ . '/../assets/uploads/profile/';
+
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0777, true);
+                }
+
+                $photoName = 'profile_' . $userId . '_' . time() . '.png';
+                $targetPath = $uploadDir . $photoName;
+
+                if (!file_put_contents($targetPath, $imageData)) {
+                    $error = 'Foto gagal disimpan.';
+                } else {
+                    $stmt = $conn->prepare("UPDATE users SET photo = ? WHERE user_id = ?");
+                    $stmt->bind_param("si", $photoName, $userId);
+
+                    if ($stmt->execute()) {
+                        $user['photo'] = $photoName;
+                        $success = 'Foto profile berhasil diperbarui.';
+                    } else {
+                        $error = 'Gagal menyimpan foto ke database.';
+                    }
+                }
+            }
+        }
+    }
 }
 
 /* =========================
@@ -152,7 +135,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
     } elseif ($weight < 0) {
         $error = 'Berat badan tidak boleh negatif.';
     } else {
-        // Cek email sudah dipakai user lain atau belum
         $stmt = $conn->prepare("
             SELECT user_id
             FROM users
@@ -166,85 +148,97 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
 
         if ($checkEmail && $checkEmail->num_rows > 0) {
             $error = 'Email sudah digunakan oleh user lain.';
+        }
+    }
+
+    if ($error === '') {
+        $stmt = $conn->prepare("
+            UPDATE users
+            SET 
+                name = ?,
+                email = ?,
+                phone = ?,
+                gender = ?,
+                age = ?,
+                height = ?,
+                weight = ?,
+                target_fitness = ?
+            WHERE user_id = ?
+        ");
+
+        $stmt->bind_param(
+            "ssssiddsi",
+            $name,
+            $email,
+            $phone,
+            $gender,
+            $age,
+            $height,
+            $weight,
+            $targetFitness,
+            $userId
+        );
+
+        if ($stmt->execute()) {
+            $_SESSION['name'] = $name;
+            $success = 'Profile berhasil diperbarui.';
+
+            $user['name'] = $name;
+            $user['email'] = $email;
+            $user['phone'] = $phone;
+            $user['gender'] = $gender;
+            $user['age'] = $age;
+            $user['height'] = $height;
+            $user['weight'] = $weight;
+            $user['target_fitness'] = $targetFitness;
         } else {
-            $stmt = $conn->prepare("
-                UPDATE users
-                SET 
-                    name = ?,
-                    email = ?,
-                    phone = ?,
-                    gender = ?,
-                    age = ?,
-                    height = ?,
-                    weight = ?,
-                    target_fitness = ?
-                WHERE user_id = ?
-            ");
-
-            $stmt->bind_param(
-                "ssssiddsi",
-                $name,
-                $email,
-                $phone,
-                $gender,
-                $age,
-                $height,
-                $weight,
-                $targetFitness,
-                $userId
-            );
-
-            if ($stmt->execute()) {
-                $_SESSION['name'] = $name;
-
-                $success = 'Profile berhasil diperbarui.';
-
-                $user['name'] = $name;
-                $user['email'] = $email;
-                $user['phone'] = $phone;
-                $user['gender'] = $gender;
-                $user['age'] = $age;
-                $user['height'] = $height;
-                $user['weight'] = $weight;
-                $user['target_fitness'] = $targetFitness;
-            } else {
-                $error = 'Gagal memperbarui profile.';
-            }
+            $error = 'Gagal memperbarui profile.';
         }
     }
 }
 
+    
 /* =========================
    UPDATE PASSWORD
 ========================= */
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_password'])) {
+    $currentPassword = trim($_POST['current_password'] ?? '');
     $newPassword = trim($_POST['new_password'] ?? '');
     $confirmPassword = trim($_POST['confirm_password'] ?? '');
 
-    if ($newPassword === '') {
-        $error = 'Password baru wajib diisi.';
+    if ($currentPassword === '' || $newPassword === '' || $confirmPassword === '') {
+        $error = 'Semua field password wajib diisi.';
     } elseif (strlen($newPassword) < 6) {
-        $error = 'Password minimal 6 karakter.';
+        $error = 'Password baru minimal 6 karakter.';
     } elseif ($newPassword !== $confirmPassword) {
         $error = 'Konfirmasi password tidak sama.';
     } else {
-        /*
-          Catatan:
-          Project kamu sebelumnya pakai password plain text.
-          Jadi kode ini ikut struktur project kamu.
-          Kalau mau lebih aman, nanti bisa diganti password_hash().
-        */
-        $stmt = $conn->prepare("
-            UPDATE users
-            SET password = ?
-            WHERE user_id = ?
-        ");
-        $stmt->bind_param("si", $newPassword, $userId);
+        $stmt = $conn->prepare("SELECT password FROM users WHERE user_id = ? LIMIT 1");
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
 
-        if ($stmt->execute()) {
-            $success = 'Password berhasil diperbarui.';
+        $dbUser = $stmt->get_result()->fetch_assoc();
+
+        if (!$dbUser) {
+            $error = 'Data user tidak ditemukan.';
         } else {
-            $error = 'Gagal memperbarui password.';
+            $dbPassword = $dbUser['password'];
+            $passwordValid = password_verify($currentPassword, $dbPassword) || $currentPassword === $dbPassword;
+
+            if (!$passwordValid) {
+                $error = 'Password lama salah.';
+            } else {
+                $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+
+                $stmt = $conn->prepare("UPDATE users SET password = ? WHERE user_id = ?");
+                $stmt->bind_param("si", $hashedPassword, $userId);
+
+                if ($stmt->execute()) {
+                    $success = 'Password berhasil diperbarui.';
+                } else {
+                    $error = 'Gagal mengubah password.';
+                }
+            }
         }
     }
 }
@@ -260,6 +254,10 @@ $ageText = !empty($user['age']) ? $user['age'] . ' tahun' : '-';
 $heightText = !empty($user['height']) ? number_format((float) $user['height'], 1, ',', '.') . ' cm' : '-';
 $weightText = !empty($user['weight']) ? number_format((float) $user['weight'], 1, ',', '.') . ' kg' : '-';
 $targetText = !empty($user['target_fitness']) ? $user['target_fitness'] : '-';
+
+$profilePhoto = !empty($user['photo'])
+    ? '../assets/uploads/profile/' . $user['photo']
+    : '../assets/img/default-avatar.svg';
 
 $bmi = 0;
 $bmiText = '-';
@@ -290,6 +288,8 @@ foreach ($fields as $field) {
 }
 $profileCompletionPercent = round(($profileCompletion / count($fields)) * 100);
 ?>
+
+<?php include '../includes/layout_top.php'; ?>
 
 <div class="dashboard-hero mb-4">
     <div>
@@ -329,18 +329,49 @@ $profileCompletionPercent = round(($profileCompletion / count($fields)) * 100);
 </div>
 
 <?php if ($success): ?>
-    <div class="alert alert-success">
-        <i class="bi bi-check-circle"></i>
-        <?= e($success) ?>
-    </div>
+<div class="alert alert-success">
+    <i class="bi bi-check-circle"></i>
+    <?= e($success) ?>
+</div>
 <?php endif; ?>
 
 <?php if ($error): ?>
-    <div class="alert alert-danger">
-        <i class="bi bi-exclamation-circle"></i>
-        <?= e($error) ?>
-    </div>
+<div class="alert alert-danger">
+    <i class="bi bi-exclamation-circle"></i>
+    <?= e($error) ?>
+</div>
 <?php endif; ?>
+
+
+<div class="premium-card mb-4 profile-photo-card">
+    <div class="profile-photo-wrapper">
+        <img id="photoPreview" src="<?= e($profilePhoto) ?>" alt="Foto Profile" class="profile-photo-img">
+
+        <div>
+            <h3 class="section-title"><?= e($user['name'] ?: 'Member') ?></h3>
+            <p class="section-subtitle"><?= e($user['email'] ?: '-') ?></p>
+
+            <form method="POST" class="profile-upload-mini">
+                <input type="hidden" name="update_photo" value="1">
+                <input type="hidden" name="cropped_photo" id="croppedPhoto">
+
+                <label class="btn-outline-soft btn-sm">
+                    <i class="bi bi-camera-fill"></i>
+                    Pilih Foto
+                    <input id="photoInput" type="file" accept="image/png, image/jpeg, image/webp" hidden>
+                </label>
+
+                <button type="submit" class="gradient-btn btn-sm">
+                    Simpan Foto
+                </button>
+            </form>
+
+            <small class="text-soft">
+                Foto akan otomatis dicrop menjadi bulat.
+            </small>
+        </div>
+    </div>
+</div>
 
 <div class="row g-4 mb-4 profile-stats-row">
     <div class="col-md-6 col-xl-3">
@@ -420,7 +451,7 @@ $profileCompletionPercent = round(($profileCompletion / count($fields)) * 100);
                 </div>
             </div>
 
-            <form method="POST">
+            <form method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="update_profile" value="1">
 
                 <div class="form-grid">
@@ -477,19 +508,24 @@ $profileCompletionPercent = round(($profileCompletion / count($fields)) * 100);
                         <label class="form-label">Target Fitness</label>
                         <select name="target_fitness" class="form-select">
                             <option value="">Pilih Target</option>
-                            <option value="Bulking" <?= ($user['target_fitness'] ?? '') === 'Bulking' ? 'selected' : '' ?>>
+                            <option value="Bulking"
+                                <?= ($user['target_fitness'] ?? '') === 'Bulking' ? 'selected' : '' ?>>
                                 Bulking
                             </option>
-                            <option value="Cutting" <?= ($user['target_fitness'] ?? '') === 'Cutting' ? 'selected' : '' ?>>
+                            <option value="Cutting"
+                                <?= ($user['target_fitness'] ?? '') === 'Cutting' ? 'selected' : '' ?>>
                                 Cutting
                             </option>
-                            <option value="Maintain" <?= ($user['target_fitness'] ?? '') === 'Maintain' ? 'selected' : '' ?>>
+                            <option value="Maintain"
+                                <?= ($user['target_fitness'] ?? '') === 'Maintain' ? 'selected' : '' ?>>
                                 Maintain
                             </option>
-                            <option value="Fat Loss" <?= ($user['target_fitness'] ?? '') === 'Fat Loss' ? 'selected' : '' ?>>
+                            <option value="Fat Loss"
+                                <?= ($user['target_fitness'] ?? '') === 'Fat Loss' ? 'selected' : '' ?>>
                                 Fat Loss
                             </option>
-                            <option value="Strength" <?= ($user['target_fitness'] ?? '') === 'Strength' ? 'selected' : '' ?>>
+                            <option value="Strength"
+                                <?= ($user['target_fitness'] ?? '') === 'Strength' ? 'selected' : '' ?>>
                                 Strength
                             </option>
                         </select>
@@ -569,6 +605,12 @@ $profileCompletionPercent = round(($profileCompletion / count($fields)) * 100);
                 <input type="hidden" name="update_password" value="1">
 
                 <div class="form-group mb-3">
+                    <label class="form-label">Password Lama</label>
+                    <input type="password" name="current_password" class="form-control"
+                        placeholder="Masukkan password lama" required>
+                </div>
+
+                <div class="form-group mb-3">
                     <label class="form-label">Password Baru</label>
                     <input type="password" name="new_password" class="form-control" placeholder="Masukkan password baru"
                         required>
@@ -633,5 +675,74 @@ $profileCompletionPercent = round(($profileCompletion / count($fields)) * 100);
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const photoInput = document.getElementById('photoInput');
+    const photoPreview = document.getElementById('photoPreview');
+    const croppedPhoto = document.getElementById('croppedPhoto');
+
+    if (!photoInput || !photoPreview || !croppedPhoto) return;
+
+    photoInput.addEventListener('change', function() {
+        const file = this.files[0];
+
+        if (!file) return;
+
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+
+        if (!allowedTypes.includes(file.type)) {
+            alert('Format foto harus JPG, PNG, atau WEBP.');
+            this.value = '';
+            return;
+        }
+
+        if (file.size > 2 * 1024 * 1024) {
+            alert('Ukuran foto maksimal 2MB.');
+            this.value = '';
+            return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = function(event) {
+            const img = new Image();
+
+            img.onload = function() {
+                const size = Math.min(img.width, img.height);
+                const startX = (img.width - size) / 2;
+                const startY = (img.height - size) / 2;
+
+                const canvas = document.createElement('canvas');
+                canvas.width = 400;
+                canvas.height = 400;
+
+                const ctx = canvas.getContext('2d');
+
+                ctx.drawImage(
+                    img,
+                    startX,
+                    startY,
+                    size,
+                    size,
+                    0,
+                    0,
+                    400,
+                    400
+                );
+
+                const croppedData = canvas.toDataURL('image/png');
+
+                photoPreview.src = croppedData;
+                croppedPhoto.value = croppedData;
+            };
+
+            img.src = event.target.result;
+        };
+
+        reader.readAsDataURL(file);
+    });
+});
+</script>
 
 <?php include '../includes/layout_bottom.php'; ?>

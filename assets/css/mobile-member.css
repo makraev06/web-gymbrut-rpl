@@ -637,3 +637,97 @@
     display: block !important;
   }
 }
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: 0 !important;
+    margin-left: 0 !important;
+    width: 100% !important;
+  }
+
+  .content-body {
+    padding: 0 12px 92px !important;
+  }
+
+  .page-grid,
+  .grid-2,
+  .grid-3,
+  .grid-4,
+  .form-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .dashboard-hero {
+    margin-top: 10px !important;
+  }
+
+  .dashboard-hero h2 {
+    font-size: 22px !important;
+  }
+
+  .profile-photo-wrapper {
+    align-items: center;
+    gap: 14px;
+  }
+
+  .profile-photo-img {
+    width: 72px;
+    height: 72px;
+    border-radius: 22px;
+  }
+
+  .profile-photo-wrapper .section-title {
+    font-size: 17px !important;
+  }
+
+  .profile-stats-row .col-md-6,
+  .profile-stats-row .col-xl-3 {
+    width: 100% !important;
+  }
+
+  .card-header-inline {
+    flex-direction: column;
+    align-items: flex-start !important;
+  }
+
+  .metric-list li {
+    align-items: flex-start !important;
+    flex-direction: column;
+    gap: 4px !important;
+  }
+
+  .gradient-btn,
+  .btn-outline-soft {
+    width: 100%;
+  }
+
+  .profile-chip div {
+    display: none;
+  }
+
+  .profile-chip {
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+  }
+
+  .profile-chip-avatar {
+    width: 40px !important;
+    height: 40px !important;
+  }
+
+  .mobile-bottom-nav {
+    left: 10px !important;
+    right: 10px !important;
+    bottom: 10px !important;
+    height: 64px !important;
+  }
+
+  .mobile-bottom-nav a span {
+    font-size: 9px !important;
+  }
+}
+
+
+
+
