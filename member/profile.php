@@ -197,7 +197,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
     }
 }
 
-    
+
 /* =========================
    UPDATE PASSWORD
 ========================= */
@@ -329,17 +329,17 @@ $profileCompletionPercent = round(($profileCompletion / count($fields)) * 100);
 </div>
 
 <?php if ($success): ?>
-<div class="alert alert-success">
-    <i class="bi bi-check-circle"></i>
-    <?= e($success) ?>
-</div>
+    <div class="alert alert-success">
+        <i class="bi bi-check-circle"></i>
+        <?= e($success) ?>
+    </div>
 <?php endif; ?>
 
 <?php if ($error): ?>
-<div class="alert alert-danger">
-    <i class="bi bi-exclamation-circle"></i>
-    <?= e($error) ?>
-</div>
+    <div class="alert alert-danger">
+        <i class="bi bi-exclamation-circle"></i>
+        <?= e($error) ?>
+    </div>
 <?php endif; ?>
 
 
@@ -508,24 +508,19 @@ $profileCompletionPercent = round(($profileCompletion / count($fields)) * 100);
                         <label class="form-label">Target Fitness</label>
                         <select name="target_fitness" class="form-select">
                             <option value="">Pilih Target</option>
-                            <option value="Bulking"
-                                <?= ($user['target_fitness'] ?? '') === 'Bulking' ? 'selected' : '' ?>>
+                            <option value="Bulking" <?= ($user['target_fitness'] ?? '') === 'Bulking' ? 'selected' : '' ?>>
                                 Bulking
                             </option>
-                            <option value="Cutting"
-                                <?= ($user['target_fitness'] ?? '') === 'Cutting' ? 'selected' : '' ?>>
+                            <option value="Cutting" <?= ($user['target_fitness'] ?? '') === 'Cutting' ? 'selected' : '' ?>>
                                 Cutting
                             </option>
-                            <option value="Maintain"
-                                <?= ($user['target_fitness'] ?? '') === 'Maintain' ? 'selected' : '' ?>>
+                            <option value="Maintain" <?= ($user['target_fitness'] ?? '') === 'Maintain' ? 'selected' : '' ?>>
                                 Maintain
                             </option>
-                            <option value="Fat Loss"
-                                <?= ($user['target_fitness'] ?? '') === 'Fat Loss' ? 'selected' : '' ?>>
+                            <option value="Fat Loss" <?= ($user['target_fitness'] ?? '') === 'Fat Loss' ? 'selected' : '' ?>>
                                 Fat Loss
                             </option>
-                            <option value="Strength"
-                                <?= ($user['target_fitness'] ?? '') === 'Strength' ? 'selected' : '' ?>>
+                            <option value="Strength" <?= ($user['target_fitness'] ?? '') === 'Strength' ? 'selected' : '' ?>>
                                 Strength
                             </option>
                         </select>
@@ -677,72 +672,72 @@ $profileCompletionPercent = round(($profileCompletion / count($fields)) * 100);
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const photoInput = document.getElementById('photoInput');
-    const photoPreview = document.getElementById('photoPreview');
-    const croppedPhoto = document.getElementById('croppedPhoto');
+    document.addEventListener('DOMContentLoaded', function () {
+        const photoInput = document.getElementById('photoInput');
+        const photoPreview = document.getElementById('photoPreview');
+        const croppedPhoto = document.getElementById('croppedPhoto');
 
-    if (!photoInput || !photoPreview || !croppedPhoto) return;
+        if (!photoInput || !photoPreview || !croppedPhoto) return;
 
-    photoInput.addEventListener('change', function() {
-        const file = this.files[0];
+        photoInput.addEventListener('change', function () {
+            const file = this.files[0];
 
-        if (!file) return;
+            if (!file) return;
 
-        const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
 
-        if (!allowedTypes.includes(file.type)) {
-            alert('Format foto harus JPG, PNG, atau WEBP.');
-            this.value = '';
-            return;
-        }
+            if (!allowedTypes.includes(file.type)) {
+                alert('Format foto harus JPG, PNG, atau WEBP.');
+                this.value = '';
+                return;
+            }
 
-        if (file.size > 2 * 1024 * 1024) {
-            alert('Ukuran foto maksimal 2MB.');
-            this.value = '';
-            return;
-        }
+            if (file.size > 2 * 1024 * 1024) {
+                alert('Ukuran foto maksimal 2MB.');
+                this.value = '';
+                return;
+            }
 
-        const reader = new FileReader();
+            const reader = new FileReader();
 
-        reader.onload = function(event) {
-            const img = new Image();
+            reader.onload = function (event) {
+                const img = new Image();
 
-            img.onload = function() {
-                const size = Math.min(img.width, img.height);
-                const startX = (img.width - size) / 2;
-                const startY = (img.height - size) / 2;
+                img.onload = function () {
+                    const size = Math.min(img.width, img.height);
+                    const startX = (img.width - size) / 2;
+                    const startY = (img.height - size) / 2;
 
-                const canvas = document.createElement('canvas');
-                canvas.width = 400;
-                canvas.height = 400;
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 400;
+                    canvas.height = 400;
 
-                const ctx = canvas.getContext('2d');
+                    const ctx = canvas.getContext('2d');
 
-                ctx.drawImage(
-                    img,
-                    startX,
-                    startY,
-                    size,
-                    size,
-                    0,
-                    0,
-                    400,
-                    400
-                );
+                    ctx.drawImage(
+                        img,
+                        startX,
+                        startY,
+                        size,
+                        size,
+                        0,
+                        0,
+                        400,
+                        400
+                    );
 
-                const croppedData = canvas.toDataURL('image/png');
+                    const croppedData = canvas.toDataURL('image/png');
 
-                photoPreview.src = croppedData;
-                croppedPhoto.value = croppedData;
+                    photoPreview.src = croppedData;
+                    croppedPhoto.value = croppedData;
+                };
+
+                img.src = event.target.result;
             };
 
-            img.src = event.target.result;
-        };
-
-        reader.readAsDataURL(file);
+            reader.readAsDataURL(file);
+        });
     });
-});
 </script>
 
 <?php include '../includes/layout_bottom.php'; ?>

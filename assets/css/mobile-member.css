@@ -512,12 +512,8 @@
     --bs-gutter-y: 10px !important;
     margin-bottom: 12px !important;
   }
-
-  body.member-profile-page .premium-card {
-    margin-bottom: 12px !important;
-  }
-
-  body.member-profile-page .form-grid {
-    gap: 10px !important;
-  }
 }
+
+
+
+
