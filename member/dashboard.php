@@ -16,6 +16,44 @@ $memberName = $_SESSION['name'] ?? 'Member';
 $userId = (int) ($_SESSION['user_id'] ?? 0);
 
 /* =========================
+   DATA USER UNTUK MEMBER CARD
+========================= */
+$memberUser = [
+    'email' => '',
+    'height' => null,
+    'weight' => null,
+    'photo' => null
+];
+
+if ($conn && $userId > 0) {
+    $stmtUser = $conn->prepare("
+        SELECT email, height, weight, photo
+        FROM users
+        WHERE user_id = ?
+        LIMIT 1
+    ");
+    if ($stmtUser) {
+        $stmtUser->bind_param("i", $userId);
+        $stmtUser->execute();
+        $resultUser = $stmtUser->get_result();
+        if ($resultUser && $resultUser->num_rows > 0) {
+            $memberUser = $resultUser->fetch_assoc();
+        }
+    }
+}
+
+$memberEmail = $memberUser['email'] ?? '';
+$memberHeight = !empty($memberUser['height'])
+    ? number_format((float) $memberUser['height'], 1, ',', '.') . ' cm'
+    : '-';
+$memberWeight = !empty($memberUser['weight'])
+    ? number_format((float) $memberUser['weight'], 1, ',', '.') . ' kg'
+    : '-';
+$memberPhoto = !empty($memberUser['photo'])
+    ? '../assets/uploads/profile/' . $memberUser['photo']
+    : '../assets/img/default-avatar.svg';
+
+/* =========================
    MEMBERSHIP TERBARU
 ========================= */
 $membership = [
@@ -223,6 +261,79 @@ $quickStats = [
     </div>
 </div>
 
+<!-- ===== MEMBER CARD ===== -->
+<div class="member-card-wrapper mb-4">
+    <div class="member-card">
+        <div class="member-card-header">
+            <div class="member-card-brand">
+                <i class="bi bi-shield-fill-check"></i>
+                <span>GYMBRUT</span>
+            </div>
+            <span class="member-card-type">MEMBER CARD</span>
+        </div>
+
+        <div class="member-card-body">
+            <div class="member-card-photo">
+                <img src="<?= e($memberPhoto) ?>" alt="Foto Member" id="memberCardPhoto">
+            </div>
+
+            <div class="member-card-info">
+                <p class="member-card-label">NAMA</p>
+                <h3 class="member-card-name"><?= e($memberName) ?></h3>
+
+                <div class="member-card-stats">
+                    <div class="member-card-stat">
+                        <span class="member-card-stat-label">TINGGI BADAN</span>
+                        <span class="member-card-stat-value"><?= e($memberHeight) ?></span>
+                    </div>
+                    <div class="member-card-stat">
+                        <span class="member-card-stat-label">BERAT BADAN</span>
+                        <span class="member-card-stat-value"><?= e($memberWeight) ?></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="member-card-qr" id="memberCardQrSmall" title="Klik untuk memperbesar QR Code">
+                <!-- QR code will be generated here by JS -->
+            </div>
+        </div>
+
+        <div class="member-card-footer">
+            <span><i class="bi bi-envelope-fill"></i> <?= e($memberEmail) ?></span>
+            <span class="member-card-id">ID: <?= e($userId) ?></span>
+        </div>
+    </div>
+</div>
+
+<!-- ===== QR CODE OVERLAY ===== -->
+<div class="qr-overlay" id="qrOverlay">
+    <div class="qr-overlay-card">
+        <button class="qr-overlay-close" id="qrOverlayClose" aria-label="Tutup">
+            <i class="bi bi-x-lg"></i>
+        </button>
+
+        <div class="qr-overlay-brand">
+            <i class="bi bi-shield-fill-check"></i>
+            <span>GYMBRUT</span>
+        </div>
+
+        <h3 class="qr-overlay-title">Member QR Code</h3>
+        <p class="qr-overlay-subtitle">Scan QR code di bawah ini untuk check-in di front desk gym.</p>
+
+        <p class="qr-overlay-name"><?= e($memberName) ?></p>
+
+        <div class="qr-overlay-qr" id="memberCardQrLarge">
+            <!-- Large QR code will be generated here by JS -->
+        </div>
+
+        <p class="qr-overlay-email"><?= e($memberEmail) ?></p>
+
+        <button class="btn-outline-soft qr-overlay-back" id="qrOverlayBack">
+            <i class="bi bi-arrow-left"></i> Kembali ke Dashboard
+        </button>
+    </div>
+</div>
+
 <div class="row g-4 mb-4">
     <?php foreach ($quickStats as $item): ?>
         <div class="col-md-6 col-xl-3">
@@ -399,5 +510,68 @@ $quickStats = [
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var memberEmail = <?= json_encode($memberEmail) ?>;
+
+    // Generate small QR
+    var qrSmallEl = document.getElementById('memberCardQrSmall');
+    if (qrSmallEl && memberEmail) {
+        new QRCode(qrSmallEl, {
+            text: memberEmail,
+            width: 80,
+            height: 80,
+            colorDark: '#18212f',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.M
+        });
+    }
+
+    // Generate large QR
+    var qrLargeEl = document.getElementById('memberCardQrLarge');
+    if (qrLargeEl && memberEmail) {
+        new QRCode(qrLargeEl, {
+            text: memberEmail,
+            width: 220,
+            height: 220,
+            colorDark: '#18212f',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.M
+        });
+    }
+
+    // QR overlay open/close
+    var overlay = document.getElementById('qrOverlay');
+    var closeBtn = document.getElementById('qrOverlayClose');
+    var backBtn = document.getElementById('qrOverlayBack');
+
+    if (qrSmallEl) {
+        qrSmallEl.addEventListener('click', function() {
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+    }
+
+    function closeOverlay() {
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    if (closeBtn) closeBtn.addEventListener('click', closeOverlay);
+    if (backBtn) backBtn.addEventListener('click', closeOverlay);
+
+    overlay.addEventListener('click', function(e) {
+        if (e.target === overlay) closeOverlay();
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && overlay.classList.contains('active')) {
+            closeOverlay();
+        }
+    });
+});
+</script>
 
 <?php include '../includes/layout_bottom.php'; ?>
